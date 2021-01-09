@@ -1,3 +1,3 @@
-# Method Call pada Javascript function
+# BLOG
 
-Testing.
+- [Catatan tentang method call pada Javascript](posts/Catatan-tentang-method-call-pada-Javascript.md)
