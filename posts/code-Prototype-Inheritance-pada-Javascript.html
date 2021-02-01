@@ -1,0 +1,51 @@
+<script>
+function Prajurit(nama){
+    this.nama = nama;
+    this.akurasi = 1; 
+    this.kecepatan = 1; 
+}
+
+function Sniper(nama,tambahanAkurasi){
+    Prajurit.call(this, nama);
+    this.akurasi += tambahanAkurasi;
+    this.akurasi += (this.akurasi*0.5)
+
+    this.akurasi = this.akurasi > 10 ? 10 : this.akurasi;
+}
+
+function Kavaleri(nama, tambahanKecepatan){
+    Prajurit.call(this, nama);
+    this.kecepatan += tambahanKecepatan;
+    this.kecepatan += (this.kecepatan*0.5)
+
+    this.kecepatan = this.kecepatan > 10 ? 10 : this.kecepatan;
+}
+
+Sniper.prototype = Object.create(Prajurit.prototype);
+Kavaleri.prototype = Object.create(Prajurit.prototype);
+
+Prajurit.prototype.menembak = function (){
+    return `${this.nama} Menembak... dooorrr!! \n akurasi : ${this.akurasi}`;
+}
+
+Prajurit.prototype.bergerak = function (){
+    return `${this.nama} Bergerak ... shh shhh . \n kecepatan : ${this.kecepatan}`;
+}
+
+Sniper.prototype.membidik = function(){
+	return `${this.nama} membidik ... fokus!! \n akurasi : ${this.akurasi}`;
+}
+
+
+Kavaleri.prototype.berkuda = function(){
+	return `${this.nama} bergerak cepat ... berkuda dengan penuh determinasi!! \n kecepatan : ${this.kecepatan}`;
+}
+
+let sniper1 = new Sniper("Yorke", 2);
+let kavaleri1 = new Kavaleri("Haris", 3);
+
+console.log(sniper1.membidik());
+console.log(kavaleri1.berkuda());
+console.log(sniper1.menembak());
+console.log(kavaleri1.bergerak());
+</script>
