@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>Categories on KalilikaBlog</title>
+		<link>https://taufiq33.github.io/categories/</link>
+		<description>Recent content in Categories on taufiq33.github.io</description>
+		<generator>Hugo -- gohugo.io</generator>
+		<language>id-id</language>
+		<copyright>© Copyright 2022 | Taufiq Hidayat</copyright>
+		<lastBuildDate>Sun, 29 May 2022 16:47:52 +0700</lastBuildDate>
+		<atom:link href="https://taufiq33.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+		<item>
+			<title>Solving Problem</title>
+			<link>https://taufiq33.github.io/categories/solving-problem/</link>
+			<pubDate>Sun, 29 May 2022 16:47:52 +0700</pubDate>
+			<guid>https://taufiq33.github.io/categories/solving-problem/</guid>
+			<description>
+			
+			</description>
+		</item>
+	</channel>
+</rss>
