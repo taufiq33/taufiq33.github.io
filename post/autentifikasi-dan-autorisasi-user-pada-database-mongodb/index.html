@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Autentifikasi Dan Autorisasi User Pada Database Mongodb | KalilikaBlog</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="generator" content="Hugo 0.99.1" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="keywords" content="mongodb, nosql">
+<meta name="description" content="Latar Belakang Masalah Setelah install ulang kemarin, saya lupa untuk mencatat step by step membuat akun untuk database tertentu pada database MongoDB ini. …">
+<link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="stylesheet" type="text/css" media="screen" href="/css/normalize.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="/css/main.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="/css/all.css" /><link rel="stylesheet" href="/css/katex.css" crossorigin="anonymous">
+<script defer src="/js/katex.js"  integrity="sha384-PFWG8XW41D5NzhNv5FegM1CUkw9nNLdWug8DuwnUoNEVop9n5frjcnbtsZtxTNjw" crossorigin="anonymous"></script>
+<script defer src="/js/auto-render.js" integrity="sha384-EN2q+JG5/3Z8gD7hT5WZqq+W+9wQR4P3IezfuZmGG5RkNXaaaks85seDJO7WkZlY" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() { renderMathInElement(document.body, { delimiters: [ {left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false} ] }); });
+</script>
+
+
+
+
+<meta property="og:title" content="Autentifikasi Dan Autorisasi User Pada Database Mongodb" />
+<meta property="og:description" content="Latar Belakang Masalah Setelah install ulang kemarin, saya lupa untuk mencatat step by step membuat akun untuk database tertentu pada database MongoDB ini. Sebenarnya ini tidak terbatas pada akun root saja, tapi bisa juga akun dengan hak akses level lain.
+Secara default ketika kita menjalankan server MongoDB, (melalui perinth mongod), itu berjalan tanpa authentication.
+Saya menuliskan nya kembali disini.
+Prasyarat Pastikan Anda sudah melakukan instalasi MongoDB. Bisadicek dengan perintah mongo --version ." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://taufiq33.github.io/post/autentifikasi-dan-autorisasi-user-pada-database-mongodb/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2022-06-09T17:22:21+07:00" />
+<meta property="article:modified_time" content="2022-06-09T17:22:21+07:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Autentifikasi Dan Autorisasi User Pada Database Mongodb"/>
+<meta name="twitter:description" content="Latar Belakang Masalah Setelah install ulang kemarin, saya lupa untuk mencatat step by step membuat akun untuk database tertentu pada database MongoDB ini. Sebenarnya ini tidak terbatas pada akun root saja, tapi bisa juga akun dengan hak akses level lain.
+Secara default ketika kita menjalankan server MongoDB, (melalui perinth mongod), itu berjalan tanpa authentication.
+Saya menuliskan nya kembali disini.
+Prasyarat Pastikan Anda sudah melakukan instalasi MongoDB. Bisadicek dengan perintah mongo --version ."/>
+
+<meta itemprop="name" content="Autentifikasi Dan Autorisasi User Pada Database Mongodb">
+<meta itemprop="description" content="Latar Belakang Masalah Setelah install ulang kemarin, saya lupa untuk mencatat step by step membuat akun untuk database tertentu pada database MongoDB ini. Sebenarnya ini tidak terbatas pada akun root saja, tapi bisa juga akun dengan hak akses level lain.
+Secara default ketika kita menjalankan server MongoDB, (melalui perinth mongod), itu berjalan tanpa authentication.
+Saya menuliskan nya kembali disini.
+Prasyarat Pastikan Anda sudah melakukan instalasi MongoDB. Bisadicek dengan perintah mongo --version ."><meta itemprop="datePublished" content="2022-06-09T17:22:21+07:00" />
+<meta itemprop="dateModified" content="2022-06-09T17:22:21+07:00" />
+<meta itemprop="wordCount" content="1891">
+<meta itemprop="keywords" content="mongodb,nosql," />
+</head>
+<body>
+<header>
+<div id="avatar">
+<a href="https://taufiq33.github.io"><img src="/kalilika.png" alt="KalilikaBlog"></a>
+</div>
+<div id="titletext">
+<h2 id="title"><a href="https://taufiq33.github.io">KalilikaBlog</a></h2>
+</div>
+<div id="title-description">
+<p id="subtitle">Blog untuk menuliskan apa yang saya ketahui.</p>
+<div id="social">
+<nav><ul>
+<li><a href="https://github.com/taufiq33"><i title="Github" class="icons fab fa-github"></i></a></li>
+<li><a href="/index.xml"><i title="RSS" class="icons fas fa-rss"></i></a></li>
+<li><a><i title="Switch Dark Mode" class="dark-mode icons fas fa-moon"></i></a></li>
+</ul></nav>
+</div>
+</div>
+<div id="mainmenu">
+<nav>
+<ul>
+<li><a href="/">Home</a></li>
+<li><a href="/post">All Posts</a></li>
+<li><a href="/about">About</a></li>
+</ul>
+</nav>
+</div>
+</header>
+<main>
+<div class="post">
+<article>
+<div class="post-header">
+<div class="meta">
+<div class="date">
+<span class="day">09</span>
+<span class="rest">Jun 2022</span>
+</div>
+</div>
+<div class="matter">
+<h1 class="title">Autentifikasi Dan Autorisasi User Pada Database Mongodb</h1>
+<p class="post-meta">
+<span class="post-meta">
+
+&nbsp;<i class="fas fa-clock"></i>&nbsp;9&nbsp;
+
+
+ 
+&nbsp;| &nbsp;
+
+<i class="fas fa-book"></i>&nbsp;1891&nbsp;
+
+
+
+
+</span>
+
+</p>
+</div>
+</div>
+<div class="markdown">
+<h1 id="latar-belakang-masalah">Latar Belakang Masalah</h1>
+<p>Setelah install ulang kemarin, saya lupa untuk mencatat step by step membuat akun untuk database tertentu pada database MongoDB ini. Sebenarnya ini tidak terbatas pada akun root saja, tapi bisa juga akun dengan hak akses level lain.</p>
+<p>Secara default ketika kita menjalankan server MongoDB, (melalui perinth mongod), itu berjalan tanpa authentication.</p>
+<p>Saya menuliskan nya kembali disini.</p>
+<h1 id="prasyarat">Prasyarat</h1>
+<p>Pastikan Anda sudah melakukan instalasi MongoDB. Bisadicek dengan perintah <code>mongo --version</code> . Oh iya saya menggunakan MongoDB versi 4.4.14. Untuk petunjuk instalasi bisa langsung menuju documentasi resmi nya di <a href="https://www.mongodb.com/docs/v4.4/installation/" target="_blank">https://www.mongodb.com/docs/v4.4/installation/</a> .</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>taufiqh@taufiqh-Aspire-4739:~$ mongo --version
+</span></span><span style="display:flex;"><span>MongoDB shell version v4.4.14
+</span></span><span style="display:flex;"><span>Build Info: <span style="color:#333">{</span>
+</span></span><span style="display:flex;"><span>    <span style="background-color:#fff0f0">&#34;version&#34;</span>: <span style="background-color:#fff0f0">&#34;4.4.14&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="background-color:#fff0f0">&#34;gitVersion&#34;</span>: <span style="background-color:#fff0f0">&#34;0b0843af97c3ec9d2c0995152d96d2aad725aab7&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="background-color:#fff0f0">&#34;openSSLVersion&#34;</span>: <span style="background-color:#fff0f0">&#34;OpenSSL 1.1.1f  31 Mar 2020&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="background-color:#fff0f0">&#34;modules&#34;</span>: <span style="color:#333">[]</span>,
+</span></span><span style="display:flex;"><span>    <span style="background-color:#fff0f0">&#34;allocator&#34;</span>: <span style="background-color:#fff0f0">&#34;tcmalloc&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="background-color:#fff0f0">&#34;environment&#34;</span>: <span style="color:#333">{</span>
+</span></span><span style="display:flex;"><span>        <span style="background-color:#fff0f0">&#34;distmod&#34;</span>: <span style="background-color:#fff0f0">&#34;ubuntu2004&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="background-color:#fff0f0">&#34;distarch&#34;</span>: <span style="background-color:#fff0f0">&#34;x86_64&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="background-color:#fff0f0">&#34;target_arch&#34;</span>: <span style="background-color:#fff0f0">&#34;x86_64&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">}</span>
+</span></span></code></pre></div><h1 id="langkah-langkah">Langkah-Langkah</h1>
+<p>Untuk mengaktifkan fitur authentication pada MongoDB, Anda perlu merubah file config MongoDB, dengan menghapus karakter &ldquo;#&rdquo; pada security dan authorization. Dan nilai dari authorization adalah <strong>enabled</strong>. Secara default di Laptop saya (yang menggunakan OS GNU/Linux Zorin) itu ada di <code>/etc/mongod/conf</code>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#888"># how the process runs</span>
+</span></span><span style="display:flex;"><span>processManagement:
+</span></span><span style="display:flex;"><span>  timeZoneInfo: /usr/share/zoneinfo
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888">#security:</span>
+</span></span><span style="display:flex;"><span><span style="color:#888">#  authorization: enabled</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888">#operationProfiling:</span>
+</span></span></code></pre></div><p>Tapi <strong>Jangan dirubah dulu</strong> .
+Anda boleh merubahnya ketika user root sudah berhasil dibuat / Anda sudah membuat akun yang sudah diberi akses pada database tertentu.</p>
+<p>Silahkan ikuti langkah berikut :</p>
+<h2 id="memastikan-service-mongodb-sudah-berjalan">Memastikan service MongoDB sudah berjalan.</h2>
+<p>Cara cek apakah sudah aktif atau belum adalah dengan mengetikkan perintah <code>sudo systemctl status mongod</code> .</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>taufiqh@taufiqh-Aspire-4739:~$ sudo systemctl status mongod
+</span></span><span style="display:flex;"><span>● mongod.service - MongoDB Database Server
+</span></span><span style="display:flex;"><span>     Loaded: loaded <span style="color:#333">(</span>/lib/systemd/system/mongod.service; disabled; vendor prese&gt;
+</span></span><span style="display:flex;"><span>     Active: inactive <span style="color:#333">(</span>dead<span style="color:#333">)</span>
+</span></span><span style="display:flex;"><span>       Docs: https://docs.mongodb.org/manual
+</span></span></code></pre></div><p>Nah kalau posisi seperti diatas berarti service MongoDB belum berjalan. Silahkan eksekusi perintah <code>sudo systemctl start mongod</code> . Lalu cek lagi statusnya. Pastikan sudah <strong>Active</strong> .</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>taufiqh@taufiqh-Aspire-4739:~$ sudo systemctl start mongod
+</span></span><span style="display:flex;"><span>taufiqh@taufiqh-Aspire-4739:~$ sudo systemctl status mongod
+</span></span><span style="display:flex;"><span>● mongod.service - MongoDB Database Server
+</span></span><span style="display:flex;"><span>     Loaded: loaded <span style="color:#333">(</span>/lib/systemd/system/mongod.service; disabled; vendor prese&gt;
+</span></span><span style="display:flex;"><span>     Active: active <span style="color:#333">(</span>running<span style="color:#333">)</span> since Thu 2022-06-09 16:12:39 WIB; 1s ago
+</span></span><span style="display:flex;"><span>       Docs: https://docs.mongodb.org/manual
+</span></span><span style="display:flex;"><span>   Main PID: <span style="color:#60e;font-weight:bold">8540</span> <span style="color:#333">(</span>mongod<span style="color:#333">)</span>
+</span></span><span style="display:flex;"><span>     Memory: 39.9M
+</span></span><span style="display:flex;"><span>     CGroup: /system.slice/mongod.service
+</span></span><span style="display:flex;"><span>             └─8540 /usr/bin/mongod --config /etc/mongod.conf
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Jun <span style="color:#60e;font-weight:bold">09</span> 16:12:39 taufiqh-Aspire-4739 systemd<span style="color:#333">[</span>1<span style="color:#333">]</span>: Started MongoDB Database Server.
+</span></span><span style="display:flex;"><span>lines 1-10/10 <span style="color:#333">(</span>END<span style="color:#333">)</span>
+</span></span></code></pre></div><p>tekan &lsquo;q&rsquo; untuk keluar dari mode status.</p>
+<h2 id="membuat-database-collection-dan-beberapa-document">Membuat Database, Collection dan beberapa document</h2>
+<p>untuk keperluan tutorial ini, silahkan buat <em>database</em> <code>perpustakaan</code> , dengan <em>collection</em> <code>buku</code> . Tambahkan 1-2 document juga ya.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>taufiqh@taufiqh-Aspire-4739:~$ mongo --quiet
+</span></span><span style="display:flex;"><span>&gt; use perpustakaan
+</span></span><span style="display:flex;"><span>switched to db perpustakaan
+</span></span><span style="display:flex;"><span>&gt; db.buku.insertOne<span style="color:#333">({</span>
+</span></span><span style="display:flex;"><span>... <span style="background-color:#fff0f0">&#34;title&#34;</span>: <span style="background-color:#fff0f0">&#34;Mata yang Enak Dipandang&#34;</span>,
+</span></span><span style="display:flex;"><span>... <span style="background-color:#fff0f0">&#34;penulis&#34;</span>: <span style="background-color:#fff0f0">&#34;Ahmad Tohari&#34;</span>,
+</span></span><span style="display:flex;"><span>... <span style="background-color:#fff0f0">&#34;penerbit&#34;</span>: <span style="background-color:#fff0f0">&#34;PT Gramedia Pustaka Utama&#34;</span>,
+</span></span><span style="display:flex;"><span>... <span style="background-color:#fff0f0">&#34;tebal_halaman&#34;</span>: <span style="background-color:#fff0f0">&#34;216&#34;</span>,
+</span></span><span style="display:flex;"><span>... <span style="background-color:#fff0f0">&#34;isbn&#34;</span>: <span style="background-color:#fff0f0">&#34;978-602-03005-9-7&#34;</span>,
+</span></span><span style="display:flex;"><span>... <span style="color:#333">})</span>;
+</span></span><span style="display:flex;"><span><span style="color:#333">{</span>
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;acknowledged&#34;</span> : true,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;insertedId&#34;</span> : ObjectId<span style="color:#333">(</span><span style="background-color:#fff0f0">&#34;62a1c0f5fed4d7df3d34314d&#34;</span><span style="color:#333">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span>&gt; db.buku.find<span style="color:#333">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">{</span> <span style="background-color:#fff0f0">&#34;_id&#34;</span> : ObjectId<span style="color:#333">(</span><span style="background-color:#fff0f0">&#34;62a1c0f5fed4d7df3d34314d&#34;</span><span style="color:#333">)</span>, <span style="background-color:#fff0f0">&#34;title&#34;</span> : <span style="background-color:#fff0f0">&#34;Mata yang Enak Dipandang&#34;</span>, <span style="background-color:#fff0f0">&#34;penulis&#34;</span> : <span style="background-color:#fff0f0">&#34;Ahmad Tohari&#34;</span>, <span style="background-color:#fff0f0">&#34;penerbit&#34;</span> : <span style="background-color:#fff0f0">&#34;PT Gramedia Pustaka Utama&#34;</span>, <span style="background-color:#fff0f0">&#34;tebal_halaman&#34;</span> : <span style="background-color:#fff0f0">&#34;216&#34;</span>, <span style="background-color:#fff0f0">&#34;isbn&#34;</span> : <span style="background-color:#fff0f0">&#34;978-602-03005-9-7&#34;</span> <span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span>&gt; db.buku.insertOne<span style="color:#333">({</span>
+</span></span><span style="display:flex;"><span>... <span style="background-color:#fff0f0">&#34;title&#34;</span>: <span style="background-color:#fff0f0">&#34;Sapiens&#34;</span>,
+</span></span><span style="display:flex;"><span>... <span style="background-color:#fff0f0">&#34;penulis&#34;</span>:<span style="background-color:#fff0f0">&#34;Yuval Noah Harari&#34;</span>,
+</span></span><span style="display:flex;"><span>... <span style="background-color:#fff0f0">&#34;penerbit&#34;</span>: <span style="background-color:#fff0f0">&#34;PT Gramedia Pustaka Utama&#34;</span>,
+</span></span><span style="display:flex;"><span>... <span style="background-color:#fff0f0">&#34;tebal_halaman&#34;</span>: <span style="background-color:#fff0f0">&#34;526&#34;</span>,
+</span></span><span style="display:flex;"><span>... <span style="background-color:#fff0f0">&#34;isbn&#34;</span>:
+</span></span><span style="display:flex;"><span>... <span style="background-color:#fff0f0">&#34;978-602-424-416-3&#34;</span><span style="color:#333">})</span>;
+</span></span><span style="display:flex;"><span><span style="color:#333">{</span>
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;acknowledged&#34;</span> : true,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;insertedId&#34;</span> : ObjectId<span style="color:#333">(</span><span style="background-color:#fff0f0">&#34;62a1c221fed4d7df3d34314e&#34;</span><span style="color:#333">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span>&gt; db.buku.find<span style="color:#333">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">{</span> <span style="background-color:#fff0f0">&#34;_id&#34;</span> : ObjectId<span style="color:#333">(</span><span style="background-color:#fff0f0">&#34;62a1c0f5fed4d7df3d34314d&#34;</span><span style="color:#333">)</span>, <span style="background-color:#fff0f0">&#34;title&#34;</span> : <span style="background-color:#fff0f0">&#34;Mata yang Enak Dipandang&#34;</span>, <span style="background-color:#fff0f0">&#34;penulis&#34;</span> : <span style="background-color:#fff0f0">&#34;Ahmad Tohari&#34;</span>, <span style="background-color:#fff0f0">&#34;penerbit&#34;</span> : <span style="background-color:#fff0f0">&#34;PT Gramedia Pustaka Utama&#34;</span>, <span style="background-color:#fff0f0">&#34;tebal_halaman&#34;</span> : <span style="background-color:#fff0f0">&#34;216&#34;</span>, <span style="background-color:#fff0f0">&#34;isbn&#34;</span> : <span style="background-color:#fff0f0">&#34;978-602-03005-9-7&#34;</span> <span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">{</span> <span style="background-color:#fff0f0">&#34;_id&#34;</span> : ObjectId<span style="color:#333">(</span><span style="background-color:#fff0f0">&#34;62a1c221fed4d7df3d34314e&#34;</span><span style="color:#333">)</span>, <span style="background-color:#fff0f0">&#34;title&#34;</span> : <span style="background-color:#fff0f0">&#34;Sapiens&#34;</span>, <span style="background-color:#fff0f0">&#34;penulis&#34;</span> : <span style="background-color:#fff0f0">&#34;Yuval Noah Harari&#34;</span>, <span style="background-color:#fff0f0">&#34;penerbit&#34;</span> : <span style="background-color:#fff0f0">&#34;PT Gramedia Pustaka Utama&#34;</span>, <span style="background-color:#fff0f0">&#34;tebal_halaman&#34;</span> : <span style="background-color:#fff0f0">&#34;526&#34;</span>, <span style="background-color:#fff0f0">&#34;isbn&#34;</span> : <span style="background-color:#fff0f0">&#34;978-602-424-416-3&#34;</span> <span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span>&gt; 
+</span></span></code></pre></div><p><code>mongo --quiet</code> adalah perintah untuk masuk ke mode shell MongoDB dengan menyembunyikan pesan log saat proses koneksi.</p>
+<p><code>use perpustakaan</code> untuk membuat database dengan nama &ldquo;perpustakaan&rdquo;.</p>
+<p><code>db.buku.insertOne</code> ini sebenarnya command untuk menambahkan 1 document ke sebuah collection. Karena collection &ldquo;buku&rdquo; belum ada, otomatis akan dibuatkan.</p>
+<p><code>db.buku.find()</code> untuk menampilkan semua document yang ada pada collection &ldquo;buku&rdquo;.</p>
+<p>Bagi yang asing dengan istilah <strong>document</strong> dan <strong>collection</strong> , itu adalah nama lain dari <strong>data/row</strong> dan <strong>tabel</strong> pada Database Relational (DBMS).</p>
+<h2 id="membuat-user-khusus-untuk-mengakses-database-tertentu">Membuat user khusus untuk mengakses database tertentu.</h2>
+<p>Nah setelah database perpustakaan tadi selesai dibuat, lanjut dengan membuat user khusus yang nantinya database perpustakaan ini hanya bisa diakses dengan user ini.
+Pastikan shell mongoDB masih aktif ya, lalu ketikkan perintah :</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; use admin
+</span></span><span style="display:flex;"><span>switched to db admin
+</span></span><span style="display:flex;"><span>&gt; db.createUser<span style="color:#333">({</span>
+</span></span><span style="display:flex;"><span>... user: <span style="background-color:#fff0f0">&#34;admin-perpustakaan&#34;</span>,
+</span></span><span style="display:flex;"><span>... pwd: <span style="background-color:#fff0f0">&#34;passwordkokgitu&#34;</span>,
+</span></span><span style="display:flex;"><span>... roles:<span style="color:#333">[</span>
+</span></span><span style="display:flex;"><span>... <span style="color:#333">{</span>role: <span style="background-color:#fff0f0">&#39;dbOwner&#39;</span>, db: <span style="background-color:#fff0f0">&#39;perpustakaan&#39;</span><span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span>... <span style="color:#333">]</span>
+</span></span><span style="display:flex;"><span>... <span style="color:#333">})</span>;
+</span></span><span style="display:flex;"><span>Successfully added user: <span style="color:#333">{</span>
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;user&#34;</span> : <span style="background-color:#fff0f0">&#34;admin-perpustakaan&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;roles&#34;</span> : <span style="color:#333">[</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#333">{</span>
+</span></span><span style="display:flex;"><span>			<span style="background-color:#fff0f0">&#34;role&#34;</span> : <span style="background-color:#fff0f0">&#34;dbOwner&#34;</span>,
+</span></span><span style="display:flex;"><span>			<span style="background-color:#fff0f0">&#34;db&#34;</span> : <span style="background-color:#fff0f0">&#34;perpustakaan&#34;</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#333">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span>&gt; 
+</span></span></code></pre></div><p><code>use admin</code> ini perintah untuk mengakses database admin.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; db.createUser<span style="color:#333">({</span>
+</span></span><span style="display:flex;"><span>... user: <span style="background-color:#fff0f0">&#34;admin-perpustakaan&#34;</span>,
+</span></span><span style="display:flex;"><span>... pwd: <span style="background-color:#fff0f0">&#34;passwordkokgitu&#34;</span>,
+</span></span><span style="display:flex;"><span>... roles:<span style="color:#333">[</span>
+</span></span><span style="display:flex;"><span>... <span style="color:#333">{</span>role: <span style="background-color:#fff0f0">&#39;dbOwner&#39;</span>, db: <span style="background-color:#fff0f0">&#39;perpustakaan&#39;</span><span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span>... <span style="color:#333">]</span>
+</span></span><span style="display:flex;"><span>... <span style="color:#333">})</span>;
+</span></span></code></pre></div><p><code>db.createUser</code> diatas  berfungsi untuk membuat user baru.</p>
+<p><code>user</code> adalah isian nama dari user yang ingin dibuat.</p>
+<p><code>pwd</code> adalah isian kata sandi / password.</p>
+<p><code>roles</code> adalah isian untuk role yang digunakan oleh user yang sedang dibuat serta database yang diberi akses.</p>
+<p>berikut beberapa macam role yang tersedia :</p>
+<ul>
+<li>read [membaca database]</li>
+<li>readWrite [membaca dan menulis database]</li>
+<li>dbAdmin [akses pengaturan skema, indexing dsb]</li>
+<li>userAdmin [akses untuk manajemen role]</li>
+<li>dbOwner [kombinasi dari ke empat role diatas]</li>
+</ul>
+<p>role-role diatas pengaplikasiannya pada 1 database. Sementara jika Anda ingin memberi akses tsb yang konteksnya untuk semua database yang ada di MongoDB server, maka tambahkan prefix <code>AnyDatabase</code> diakhir yang berarti, itu berlaku untuk semua database.</p>
+<ul>
+<li>readAnyDatabase</li>
+<li>readWriteAnyDatabase</li>
+<li>dbAdminAnyDatabase</li>
+<li>userAdminAnyDatabase</li>
+<li>dbOwnerAnyDatabase</li>
+</ul>
+<p>selain itu ada role <code>root</code> yang mana ini adalah role/hak akses tertinggi dan bisa melakukan apapun pada database manapun tergantung settingnya.</p>
+<p>Anda bisa baca lengkap di dokumentasi resmi <a href="https://www.mongodb.com/docs/v4.4/reference/built-in-roles/" target="_blank">https://www.mongodb.com/docs/v4.4/reference/built-in-roles/</a>.</p>
+<p>user &lsquo;admin-perpustaan&rsquo; yang kita buat tadi memiliki role <code>dbOwner</code>, yang berarti punya akses untuk baca, tulis, manajemen role, indexing dsb terhadap database &lsquo;perpustakaan&rsquo;.</p>
+<h2 id="menggunakan-akun-yang-sudah-dibuat-untuk-mengakses-database">Menggunakan akun yang sudah dibuat untuk mengakses database.</h2>
+<p>Nah inilah saatnya Anda mengaktifkan fitur authorization pada file config mongoDB. Buka file <code>/etc/mongod/conf</code> dengan teks editor kesayangan Anda. Lalu hapus karakter &lsquo;#&rsquo; pada bagian security dan authorization. Dan pastikan pada nilai authorization adalah <strong>enabled</strong>. Kurang lebih seperti ini hasilnya.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#888"># how the process runs</span>
+</span></span><span style="display:flex;"><span>processManagement:
+</span></span><span style="display:flex;"><span>  timeZoneInfo: /usr/share/zoneinfo
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>security:
+</span></span><span style="display:flex;"><span>  authorization: enabled
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888">#operationProfiling:</span>
+</span></span></code></pre></div><p>Jangan lupa disave. Jika muncul error saat melakukan save file config tsb, maka pastikan Anda membuka file config tsb sebagai root. Jika di GNU/Linux tinggal menambahkan prefix sudo diawal command.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>taufiqh@taufiqh-Aspire-4739:~$ sudo gedit /etc/mongod.conf
+</span></span></code></pre></div><p>Langkah selanjutnya restart service mongoDB, dengan perintah :</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo systemctl restart mongod
+</span></span></code></pre></div><p>Cek dan pastikan service mongoDB tetap active (tidak ada error) dengan perintah :</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo systemctl status mongod
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>taufiqh@taufiqh-Aspire-4739:~$ sudo systemctl restart mongod
+</span></span><span style="display:flex;"><span>taufiqh@taufiqh-Aspire-4739:~$ sudo systemctl status mongod
+</span></span><span style="display:flex;"><span>● mongod.service - MongoDB Database Server
+</span></span><span style="display:flex;"><span>     Loaded: loaded <span style="color:#333">(</span>/lib/systemd/system/mongod.service; disabled; vendor prese&gt;
+</span></span><span style="display:flex;"><span>     Active: active <span style="color:#333">(</span>running<span style="color:#333">)</span> since Mon 2022-06-13 06:31:22 WIB; 7s ago
+</span></span><span style="display:flex;"><span>       Docs: https://docs.mongodb.org/manual
+</span></span><span style="display:flex;"><span>   Main PID: <span style="color:#60e;font-weight:bold">4685</span> <span style="color:#333">(</span>mongod<span style="color:#333">)</span>
+</span></span><span style="display:flex;"><span>     Memory: 157.1M
+</span></span><span style="display:flex;"><span>     CGroup: /system.slice/mongod.service
+</span></span><span style="display:flex;"><span>             └─4685 /usr/bin/mongod --config /etc/mongod.conf
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Jun <span style="color:#60e;font-weight:bold">13</span> 06:31:22 taufiqh-Aspire-4739 systemd<span style="color:#333">[</span>1<span style="color:#333">]</span>: Started MongoDB Database Server.
+</span></span><span style="display:flex;"><span>lines 1-10/10 <span style="color:#333">(</span>END<span style="color:#333">)</span>
+</span></span></code></pre></div><p>tekan &lsquo;q&rsquo; untuk keluar mode status tsb.</p>
+<p>Setelah itu Anda bisa masuk mode Shell MongoDB dengan user yang sudah dibuat tadi.</p>
+<p><code>mongo --quiet -u [nama user]</code></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>taufiqh@taufiqh-Aspire-4739:~$ mongo --quiet -u admin-perpustakaan
+</span></span><span style="display:flex;"><span>Enter password: 
+</span></span><span style="display:flex;"><span>&gt; 
+</span></span></code></pre></div><p>Untuk isian password silahkan diisi sesuai dengan data yang diberikan ketika membuat user.
+Jika sudah muncul karakter &ldquo;&gt;&rdquo; berarti login berhasil.</p>
+<p>Sekarang mari kita coba menambah 1 buat document kedalam collection buku.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>&gt; show databases;
+</span></span><span style="display:flex;"><span>perpustakaan  0.000GB
+</span></span><span style="display:flex;"><span>&gt; use perpustakaan;
+</span></span><span style="display:flex;"><span>switched to db perpustakaan
+</span></span><span style="display:flex;"><span>&gt; show collections
+</span></span><span style="display:flex;"><span>buku
+</span></span><span style="display:flex;"><span>&gt; db.buku.find<span style="color:#333">()</span>.pretty<span style="color:#333">()</span>;
+</span></span><span style="display:flex;"><span><span style="color:#333">{</span>
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;_id&#34;</span> : ObjectId<span style="color:#333">(</span><span style="background-color:#fff0f0">&#34;62a1c0f5fed4d7df3d34314d&#34;</span><span style="color:#333">)</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;title&#34;</span> : <span style="background-color:#fff0f0">&#34;Mata yang Enak Dipandang&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;penulis&#34;</span> : <span style="background-color:#fff0f0">&#34;Ahmad Tohari&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;penerbit&#34;</span> : <span style="background-color:#fff0f0">&#34;PT Gramedia Pustaka Utama&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;tebal_halaman&#34;</span> : <span style="background-color:#fff0f0">&#34;216&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;isbn&#34;</span> : <span style="background-color:#fff0f0">&#34;978-602-03005-9-7&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">{</span>
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;_id&#34;</span> : ObjectId<span style="color:#333">(</span><span style="background-color:#fff0f0">&#34;62a1c221fed4d7df3d34314e&#34;</span><span style="color:#333">)</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;title&#34;</span> : <span style="background-color:#fff0f0">&#34;Sapiens&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;penulis&#34;</span> : <span style="background-color:#fff0f0">&#34;Yuval Noah Harari&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;penerbit&#34;</span> : <span style="background-color:#fff0f0">&#34;PT Gramedia Pustaka Utama&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;tebal_halaman&#34;</span> : <span style="background-color:#fff0f0">&#34;526&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;isbn&#34;</span> : <span style="background-color:#fff0f0">&#34;978-602-424-416-3&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span>&gt; db.buku.insertOne<span style="color:#333">({</span>
+</span></span><span style="display:flex;"><span>... title: <span style="background-color:#fff0f0">&#39;Chairul Tanjung-Si Anak Singkong&#39;</span>,
+</span></span><span style="display:flex;"><span>... penulis: <span style="color:#333">[</span><span style="background-color:#fff0f0">&#34;Tjahja Gunawan Diredja&#34;</span>, <span style="background-color:#fff0f0">&#34;Chairul Tanjung&#34;</span><span style="color:#333">]</span>,
+</span></span><span style="display:flex;"><span>... penerbit: <span style="background-color:#fff0f0">&#34;Buku Kompas&#34;</span>,
+</span></span><span style="display:flex;"><span>... tebal_halaman: 402,
+</span></span><span style="display:flex;"><span>... isbn: <span style="background-color:#fff0f0">&#34;9789797096502&#34;</span>
+</span></span><span style="display:flex;"><span>... <span style="color:#333">})</span>;
+</span></span><span style="display:flex;"><span><span style="color:#333">{</span>
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;acknowledged&#34;</span> : true,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;insertedId&#34;</span> : ObjectId<span style="color:#333">(</span><span style="background-color:#fff0f0">&#34;62a6866e414b354606399eaf&#34;</span><span style="color:#333">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span>&gt; db.buku.find<span style="color:#333">()</span>.pretty<span style="color:#333">()</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">{</span>
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;_id&#34;</span> : ObjectId<span style="color:#333">(</span><span style="background-color:#fff0f0">&#34;62a1c0f5fed4d7df3d34314d&#34;</span><span style="color:#333">)</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;title&#34;</span> : <span style="background-color:#fff0f0">&#34;Mata yang Enak Dipandang&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;penulis&#34;</span> : <span style="background-color:#fff0f0">&#34;Ahmad Tohari&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;penerbit&#34;</span> : <span style="background-color:#fff0f0">&#34;PT Gramedia Pustaka Utama&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;tebal_halaman&#34;</span> : <span style="background-color:#fff0f0">&#34;216&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;isbn&#34;</span> : <span style="background-color:#fff0f0">&#34;978-602-03005-9-7&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">{</span>
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;_id&#34;</span> : ObjectId<span style="color:#333">(</span><span style="background-color:#fff0f0">&#34;62a1c221fed4d7df3d34314e&#34;</span><span style="color:#333">)</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;title&#34;</span> : <span style="background-color:#fff0f0">&#34;Sapiens&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;penulis&#34;</span> : <span style="background-color:#fff0f0">&#34;Yuval Noah Harari&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;penerbit&#34;</span> : <span style="background-color:#fff0f0">&#34;PT Gramedia Pustaka Utama&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;tebal_halaman&#34;</span> : <span style="background-color:#fff0f0">&#34;526&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;isbn&#34;</span> : <span style="background-color:#fff0f0">&#34;978-602-424-416-3&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">{</span>
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;_id&#34;</span> : ObjectId<span style="color:#333">(</span><span style="background-color:#fff0f0">&#34;62a6866e414b354606399eaf&#34;</span><span style="color:#333">)</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;title&#34;</span> : <span style="background-color:#fff0f0">&#34;Chairul Tanjung-Si Anak Singkong&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;penulis&#34;</span> : <span style="color:#333">[</span>
+</span></span><span style="display:flex;"><span>		<span style="background-color:#fff0f0">&#34;Tjahja Gunawan Diredja&#34;</span>,
+</span></span><span style="display:flex;"><span>		<span style="background-color:#fff0f0">&#34;Chairul Tanjung&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#333">]</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;penerbit&#34;</span> : <span style="background-color:#fff0f0">&#34;Buku Kompas&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;tebal_halaman&#34;</span> : 402,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;isbn&#34;</span> : <span style="background-color:#fff0f0">&#34;9789797096502&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span>&gt; <span style="color:#007020">exit</span>
+</span></span><span style="display:flex;"><span>bye
+</span></span></code></pre></div><p>Penambahan 1 document pada collection buku berhasil. Tentu saja, karena user &lsquo;admin-perpustakaan&rsquo; punya akses utk melakukan itu.</p>
+<p>Sekarang contoh saja ya Semisal admin-perpustakaan ingin membuat user khusus untuk pegawai baru yang baru memulai training. Sehingga user khusus ini hanya diberi akses read / membaca data saja.</p>
+<p>Bagaimana caranya ?. Cukup ikuti intruksi seperti sebelumnya.</p>
+<ol>
+<li>Nonaktifkan opsi authorization pada config file mongoDB (/etc/mongod.conf). Bisa dengan merubah jadi disabled / memberi karakter &lsquo;#&rsquo; di awal.</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#888">#security:</span>
+</span></span><span style="display:flex;"><span><span style="color:#888">#   authorization: enabled</span>
+</span></span></code></pre></div><p>atau</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>security:
+</span></span><span style="display:flex;"><span>   authorization: disabled
+</span></span></code></pre></div><ol start="2">
+<li>Jangan lupa restart service setelah merubah file config.</li>
+</ol>
+<p><code>sudo systemctl restart mongod</code></p>
+<ol start="3">
+<li>Pastikan setelah restart service, service tetap aktif (tidak ada error). Cek dengan cara :</li>
+</ol>
+<p><code>sudo systemctl status mongod</code></p>
+<ol start="4">
+<li>Nah sekarang masuk mode shell mongoDB tanpa auth, lalu buat user khusus untuk pegawai baru tsb.:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>taufiqh@taufiqh-Aspire-4739:~$ mongo --quiet
+</span></span><span style="display:flex;"><span>&gt; use admin
+</span></span><span style="display:flex;"><span>switched to db admin
+</span></span><span style="display:flex;"><span>&gt; db.createUser<span style="color:#333">({</span>
+</span></span><span style="display:flex;"><span>...   user: <span style="background-color:#fff0f0">&#39;usertrainingperpus&#39;</span>,
+</span></span><span style="display:flex;"><span>...   pwd: <span style="background-color:#fff0f0">&#39;training&#39;</span>,
+</span></span><span style="display:flex;"><span>...   roles: <span style="color:#333">[{</span>role: <span style="background-color:#fff0f0">&#39;read&#39;</span>, db: <span style="background-color:#fff0f0">&#39;perpustakaan&#39;</span><span style="color:#333">}]</span>
+</span></span><span style="display:flex;"><span>... <span style="color:#333">})</span>
+</span></span><span style="display:flex;"><span>Successfully added user: <span style="color:#333">{</span>
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;user&#34;</span> : <span style="background-color:#fff0f0">&#34;usertrainingperpus&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;roles&#34;</span> : <span style="color:#333">[</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#333">{</span>
+</span></span><span style="display:flex;"><span>			<span style="background-color:#fff0f0">&#34;role&#34;</span> : <span style="background-color:#fff0f0">&#34;read&#34;</span>,
+</span></span><span style="display:flex;"><span>			<span style="background-color:#fff0f0">&#34;db&#34;</span> : <span style="background-color:#fff0f0">&#34;perpustakaan&#34;</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#333">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span>&gt; <span style="color:#007020">exit</span>
+</span></span></code></pre></div><ol start="5">
+<li>Aktifkan kembali opsi authorization pada config file mongodb. (/etc/mongod.conf)</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>security:
+</span></span><span style="display:flex;"><span>   authorization: enabled
+</span></span></code></pre></div><ol start="6">
+<li>restart service setelah merubah file config.</li>
+</ol>
+<p><code>sudo systemctl restart mongod</code></p>
+<ol start="7">
+<li>Pastikan setelah restart service, service tetap aktif (tidak ada error). Cek dengan cara :</li>
+</ol>
+<p><code>sudo systemctl status mongod</code></p>
+<p>Sudah begitu saja. Anda bisa langsung tes untuk login ke mongo shell dengan user training tsb, dan coba tmbahkan 1 document ke collection buku, maka yang Anda dapatkan adalah error.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mongo -u usertrainingperpus
+</span></span><span style="display:flex;"><span>MongoDB shell version v4.4.14
+</span></span><span style="display:flex;"><span>Enter password: 
+</span></span><span style="display:flex;"><span>connecting to: mongodb://127.0.0.1:27017/?compressors<span style="color:#333">=</span>disabled&amp;<span style="color:#963">gssapiServiceName</span><span style="color:#333">=</span>mongodb
+</span></span><span style="display:flex;"><span>Implicit session: session <span style="color:#333">{</span> <span style="background-color:#fff0f0">&#34;id&#34;</span> : UUID<span style="color:#333">(</span><span style="background-color:#fff0f0">&#34;2e0fe9e4-c07f-40dc-bc18-cc58f169cbd6&#34;</span><span style="color:#333">)</span> <span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span>MongoDB server version: 4.4.14
+</span></span><span style="display:flex;"><span>&gt; use perpustakaan;
+</span></span><span style="display:flex;"><span>switched to db perpustakaan
+</span></span><span style="display:flex;"><span>&gt; db.buku.find<span style="color:#333">()</span>.pretty<span style="color:#333">()</span>;
+</span></span><span style="display:flex;"><span><span style="color:#333">{</span>
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;_id&#34;</span> : ObjectId<span style="color:#333">(</span><span style="background-color:#fff0f0">&#34;62a1c0f5fed4d7df3d34314d&#34;</span><span style="color:#333">)</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;title&#34;</span> : <span style="background-color:#fff0f0">&#34;Mata yang Enak Dipandang&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;penulis&#34;</span> : <span style="background-color:#fff0f0">&#34;Ahmad Tohari&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;penerbit&#34;</span> : <span style="background-color:#fff0f0">&#34;PT Gramedia Pustaka Utama&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;tebal_halaman&#34;</span> : <span style="background-color:#fff0f0">&#34;216&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;isbn&#34;</span> : <span style="background-color:#fff0f0">&#34;978-602-03005-9-7&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">{</span>
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;_id&#34;</span> : ObjectId<span style="color:#333">(</span><span style="background-color:#fff0f0">&#34;62a1c221fed4d7df3d34314e&#34;</span><span style="color:#333">)</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;title&#34;</span> : <span style="background-color:#fff0f0">&#34;Sapiens&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;penulis&#34;</span> : <span style="background-color:#fff0f0">&#34;Yuval Noah Harari&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;penerbit&#34;</span> : <span style="background-color:#fff0f0">&#34;PT Gramedia Pustaka Utama&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;tebal_halaman&#34;</span> : <span style="background-color:#fff0f0">&#34;526&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;isbn&#34;</span> : <span style="background-color:#fff0f0">&#34;978-602-424-416-3&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">{</span>
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;_id&#34;</span> : ObjectId<span style="color:#333">(</span><span style="background-color:#fff0f0">&#34;62a6866e414b354606399eaf&#34;</span><span style="color:#333">)</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;title&#34;</span> : <span style="background-color:#fff0f0">&#34;Chairul Tanjung-Si Anak Singkong&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;penulis&#34;</span> : <span style="color:#333">[</span>
+</span></span><span style="display:flex;"><span>		<span style="background-color:#fff0f0">&#34;Tjahja Gunawan Diredja&#34;</span>,
+</span></span><span style="display:flex;"><span>		<span style="background-color:#fff0f0">&#34;Chairul Tanjung&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#333">]</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;penerbit&#34;</span> : <span style="background-color:#fff0f0">&#34;Buku Kompas&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;tebal_halaman&#34;</span> : 402,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;isbn&#34;</span> : <span style="background-color:#fff0f0">&#34;9789797096502&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">}</span>
+</span></span><span style="display:flex;"><span>&gt; db.buku.insertOne<span style="color:#333">({</span>
+</span></span><span style="display:flex;"><span>... title: <span style="background-color:#fff0f0">&#39;test&#39;</span>,
+</span></span><span style="display:flex;"><span>... penulis: <span style="background-color:#fff0f0">&#39;test&#39;</span>,
+</span></span><span style="display:flex;"><span>... penerbit: <span style="background-color:#fff0f0">&#39;test&#39;</span>,
+</span></span><span style="display:flex;"><span>... tebal_halaman: 2,
+</span></span><span style="display:flex;"><span>... isbn: <span style="background-color:#fff0f0">&#39;12345&#39;</span>,
+</span></span><span style="display:flex;"><span>... <span style="color:#333">})</span>;
+</span></span><span style="display:flex;"><span>uncaught exception: WriteCommandError<span style="color:#333">({</span>
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;ok&#34;</span> : 0,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;errmsg&#34;</span> : <span style="background-color:#fff0f0">&#34;not authorized on perpustakaan to execute command { insert: \&#34;buku\&#34;, ordered: true, lsid: { id: UUID(\&#34;2e0fe9e4-c07f-40dc-bc18-cc58f169cbd6\&#34;) }, </span><span style="color:#963">$db</span><span style="background-color:#fff0f0">: \&#34;perpustakaan\&#34; }&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;code&#34;</span> : 13,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;codeName&#34;</span> : <span style="background-color:#fff0f0">&#34;Unauthorized&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">})</span> :
+</span></span><span style="display:flex;"><span>WriteCommandError<span style="color:#333">({</span>
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;ok&#34;</span> : 0,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;errmsg&#34;</span> : <span style="background-color:#fff0f0">&#34;not authorized on perpustakaan to execute command { insert: \&#34;buku\&#34;, ordered: true, lsid: { id: UUID(\&#34;2e0fe9e4-c07f-40dc-bc18-cc58f169cbd6\&#34;) }, </span><span style="color:#963">$db</span><span style="background-color:#fff0f0">: \&#34;perpustakaan\&#34; }&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;code&#34;</span> : 13,
+</span></span><span style="display:flex;"><span>	<span style="background-color:#fff0f0">&#34;codeName&#34;</span> : <span style="background-color:#fff0f0">&#34;Unauthorized&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#333">})</span>
+</span></span><span style="display:flex;"><span>WriteCommandError@src/mongo/shell/bulk_api.js:417:48
+</span></span><span style="display:flex;"><span>executeBatch@src/mongo/shell/bulk_api.js:915:23
+</span></span><span style="display:flex;"><span>Bulk/this.execute@src/mongo/shell/bulk_api.js:1163:21
+</span></span><span style="display:flex;"><span>DBCollection.prototype.insertOne@src/mongo/shell/crud_api.js:264:9
+</span></span><span style="display:flex;"><span>@<span style="color:#333">(</span>shell<span style="color:#333">)</span>:1:1
+</span></span><span style="display:flex;"><span>&gt; 
+</span></span></code></pre></div><p>Anda bisa perhatikan ya, ketika usertrainingperpus membaca data, itu tidak terjadi error, tapi ketika akan menambah data,  langsung muncul error. Berarti setting hak akses sudah berhasil.</p>
+<h1 id="tambahan">Tambahan</h1>
+<p>Sebenarnya jika diperhatikan, setiap ingin menambah user harus menonaktifkan opsi authorization dulu, lalu setelah berhasil juga harus melakukan restart service mongoDB. Adakah cara yang lebih simpel??</p>
+<p>Ada, yaitu dengan cara membuat user (juga), tapi user khusus yang memiliki roles <code>root</code> atau <code>userAdminAnyDatabase</code> . Sehingga ketika kita ingin menambah user , tidak perlu lagi rubah file config dan restart service.</p>
+<p>Cukup Login sebagai user dengan roles <code>root</code> atau <code>userAdminAnyDatabase</code> , (dengan setting selalu authorization: enable). Buat user dan setting role, Lalu tidak perlu restart service lagi.</p>
+<p>Sekian tutorial dari Saya, semoga bermanfaat.</p>
+
+</div>
+<div class="tags">
+<div class="taxosfloating_left">
+<p>Categories</p>
+</div>
+<div class="termsfloating_right">
+<p>
+<a href="/categories/tutorial/">tutorial</a>
+</p>
+</div>
+<div class="clearit"></div>
+<div class="tags">
+<div class="taxosfloating_left">
+<p>Tags</p>
+</div>
+<div class="termsfloating_right">
+<p>
+<a href="/tags/mongodb/">mongodb</a>
+<a href="/tags/nosql/">nosql</a>
+</p>
+</div>
+<div class="clearit"></div>
+</div>
+
+</article>
+</div>
+</main>
+<footer>
+© Copyright 2022 | <a href="https://github.com/taufiq33" target="_blank">Taufiq Hidayat</a>
+</footer><script src="/js/dark-mode.js"></script>
+
+</body>
+</html>

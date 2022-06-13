@@ -7,8 +7,17 @@
 		<generator>Hugo -- gohugo.io</generator>
 		<language>id-id</language>
 		<copyright>© Copyright 2022 | Taufiq Hidayat</copyright>
-		<lastBuildDate>Sun, 29 May 2022 16:47:52 +0700</lastBuildDate>
+		<lastBuildDate>Thu, 09 Jun 2022 17:22:21 +0700</lastBuildDate>
 		<atom:link href="https://taufiq33.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+		<item>
+			<title>Autentifikasi Dan Autorisasi User Pada Database Mongodb</title>
+			<link>https://taufiq33.github.io/post/autentifikasi-dan-autorisasi-user-pada-database-mongodb/</link>
+			<pubDate>Thu, 09 Jun 2022 17:22:21 +0700</pubDate>
+			<guid>https://taufiq33.github.io/post/autentifikasi-dan-autorisasi-user-pada-database-mongodb/</guid>
+			<description>
+			Latar Belakang Masalah Setelah install ulang kemarin, saya lupa untuk mencatat step by step membuat akun untuk database tertentu pada …
+			</description>
+		</item>
 		<item>
 			<title>Cara Mengatasi Flashdisk Tidak Terbaca Di Perangkat Pemutar Audio</title>
 			<link>https://taufiq33.github.io/post/cara-mengatasi-flashdisk-tidak-terbaca-di-perangkat-pemutar-audio/</link>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>Tutorial on KalilikaBlog</title>
+		<link>https://taufiq33.github.io/categories/tutorial/</link>
+		<description>Recent content in Tutorial on taufiq33.github.io</description>
+		<generator>Hugo -- gohugo.io</generator>
+		<language>id-id</language>
+		<copyright>© Copyright 2022 | Taufiq Hidayat</copyright>
+		<lastBuildDate>Thu, 09 Jun 2022 17:22:21 +0700</lastBuildDate>
+		<atom:link href="https://taufiq33.github.io/categories/tutorial/index.xml" rel="self" type="application/rss+xml" />
+		<item>
+			<title>Autentifikasi Dan Autorisasi User Pada Database Mongodb</title>
+			<link>https://taufiq33.github.io/post/autentifikasi-dan-autorisasi-user-pada-database-mongodb/</link>
+			<pubDate>Thu, 09 Jun 2022 17:22:21 +0700</pubDate>
+			<guid>https://taufiq33.github.io/post/autentifikasi-dan-autorisasi-user-pada-database-mongodb/</guid>
+			<description>
+			Latar Belakang Masalah Setelah install ulang kemarin, saya lupa untuk mencatat step by step membuat akun untuk database tertentu pada …
+			</description>
+		</item>
+	</channel>
+</rss>
